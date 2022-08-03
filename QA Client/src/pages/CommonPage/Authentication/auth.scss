@@ -1,0 +1,210 @@
+$backgroundColor: white;
+$blueBtn: #46178f;
+$blueBtnHover: #983be9;
+$whiteBtn: #aaaaaa;
+$fontLiteGray: #544837;
+$deepBlack: #070c19;
+$liteRed: #ff736b;
+
+@import url("https: //i.pinimg.com/600x315/b0/2a/e2/b02ae2523a2c395bab1d7828492338bd.jpg");
+
+.wrapper {
+    animation: scroll 250s linear infinite;
+    background: url("https://www.ppt-backgrounds.net/thumbs/simple-white-seamless-patterns-image-slides.jpeg"),
+        #111111;
+}
+
+.BlueBtnBigForm {
+    background-color: $blueBtn;
+    color: white;
+    border: none;
+    width: 200px;
+    padding: 10px 20px;
+    border-radius: 5px;
+    font-size: 1rem;
+    font-weight: bold;
+    margin: 0px 10px;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+}
+
+.GoogleBtn {
+    width: 250px;
+}
+
+@keyframes scroll {
+    100% {
+        background-position: 0px -3000px;
+    }
+}
+
+@media (prefers-reduced-motion) {
+    .wrapper {
+        animation: scroll 200s linear infinite;
+    }
+}
+
+.container {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: center;
+	height: 100vh;
+	width: 100vw;
+	// background-color: #46178f;
+
+	.leftContainer {
+		flex: 1;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		padding: 30px;
+		// background-color: #544837;
+
+		.leftContainerLogo {
+			height: 150px;
+		}
+
+		.leftContainerText {
+			margin-top: 30px;
+			font-size: 1.2rem;
+			color: $blueBtn;
+			width: 40vw;
+			font-weight: 500;
+		}
+
+		.resetPassLogo {
+			height: 500px;
+		}
+	}
+
+	.rightContainer {
+		flex: 1;
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		align-items: center;
+		// background-color: #ff736b;
+
+		.rightContainerForm {
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			justify-content: space-between;
+			background-color: #ffffff;
+			width: 65%;
+			padding: 20px 0px;
+			border-radius: 10px;
+			box-shadow: rgba(40, 40, 186, 0.2) 0px 7px 29px 0px;
+			transition: all 0.3s ease-in-out;
+
+			&:hover {
+				box-shadow: rgba(40, 40, 186, 0.4) 0px 7px 29px 0px;
+			}
+
+			.formTitle {
+				font-size: 2rem;
+				color: #46178f;
+				font-weight: bold;
+				margin-bottom: 15px;
+			}
+
+			.forgotPassword {
+				display: flex;
+				flex-direction: row;
+				font-size: 1rem;
+				font-weight: 500;
+				margin-top: 15px;
+				margin-bottom: 15px;
+			}
+
+			.formFooter {
+				display: flex;
+				flex-direction: row;
+				justify-content: space-between;
+				align-items: center;
+				margin-top: 10px;
+				font-size: 1rem;
+				color: $fontLiteGray;
+				font-weight: bold;
+			}
+		}
+
+		.resetSuccess {
+			.resetSuccessTitle {
+				font-size: 1.7rem;
+				color: #46178f;
+				font-weight: bold;
+				margin-bottom: 15px;
+			}
+
+			.resetSuccessText {
+				font-size: 1.2rem;
+				font-weight: 500;
+				margin-top: 15px;
+				margin-bottom: 45px;
+			}
+		}
+	}
+}
+
+.GoogleBtnHolder {
+    padding: 30px 0px;
+    margin: 10px 0px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-evenly;
+    border-radius: 5px;
+    width: 300px;
+    color: $blueBtn;
+    font-size: 1.2rem;
+    background-color: $blueBtn;
+    color: aliceblue;
+    font-weight: bold;
+
+    .GoogleBtnHolderTxt {
+        padding-bottom: 20px;
+    }
+}
+
+@media screen and (max-width: 800px) {
+    .leftContainerLogo {
+        height: 100px;
+    }
+
+    .leftContainerText {
+        font-size: 1rem;
+    }
+}
+
+@media screen and (max-width: 600px) {
+    .container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        width: 100vw;
+        background-color: $backgroundColor;
+    }
+
+    .leftContainer {
+        flex: none;
+        margin-top: 5px;
+
+        .leftContainerLogo {
+            height: 70px;
+            margin: 20px 0px;
+        }
+
+        .leftContainerText {
+            display: none;
+        }
+    }
+
+    .rightContainer {
+        justify-content: start;
+    }
+}

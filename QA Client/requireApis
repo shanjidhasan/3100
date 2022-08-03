@@ -1,0 +1,4 @@
+1. Book upload on course/subject
+2. No images in getTeacherCourseInfoBySubjectId api calls so cant show any images in teacher course info ChapterPage.
+3. Btn click stay white (sabbir)
+4. upload popup stays in the middle of the screen (sabbir)

@@ -1,0 +1,338 @@
+.teachers_profile_container {
+    flex: none;
+    height: 100vh;
+    overflow: hidden;
+    @media screen and (max-width: 760px) {
+        overflow: auto;
+    }
+    // background-color: aqua;
+
+    .teachers_profile_header_container {
+        width: 100vw;
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        align-items: center;
+        box-shadow: 0px 0px 10px #00000029;
+    }
+    .teachers_profile_body_container {
+        display: flex;
+        padding-top: 20px;
+        background-color: #fafafa;
+
+        @media screen and (max-width: 760px) {
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .teachers_profile_body_left_container {
+            // background-color: aqua;
+            // flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            min-width: 350px;
+            padding-right: 20px;
+
+            .teachers_profile_body_left_image {
+                width: 300px;
+                height: 300px;
+                border-radius: 50%;
+                border: 1px solid #92c2d9;
+                margin-bottom: 20px;
+            }
+            .teachers_profile_card {
+                width: 300px;
+                display: flex;
+                flex-direction: column;
+                align-items: flex-start;
+
+                //components
+                .icon {
+                    margin-right: 10px;
+                }
+                .divider {
+                    margin: 5px 0;
+                    height: 2px;
+                    width: 100%;
+                    background-color: #92c2d9;
+                }
+
+                .teachers_name {
+                    width: 100%;
+                    text-align: start;
+                    font-size: 22px;
+                    font-weight: bold;
+                    margin: 14px 0;
+                }
+
+                .teachers_info {
+                    width: 100%;
+                    text-align: start;
+                    font-size: 16px;
+                    font-weight: bold;
+                    margin-bottom: 10px;
+                }
+
+                .Edit_profile_btn {
+                    width: 100%;
+                    height: 40px;
+                    background-color: #00bcd4;
+                    border-radius: 5px;
+                    color: white;
+                    font-size: 15px;
+                    font-weight: bold;
+                    text-align: center;
+                    line-height: 40px;
+                    cursor: pointer;
+                }
+
+                .teachers_profile_card_info {
+                    display: flex;
+                    flex-direction: row;
+                    margin: 10px 0px;
+                    // background-color: #00bcd4;
+                }
+
+                .teachers_profile_card_edit_info {
+                    display: flex;
+                    flex-direction: column;
+                    margin: 10px 0px;
+                    // background-color: #00bcd4;
+
+                    div {
+                        display: flex;
+                        flex-direction: row;
+                        align-items: center;
+                        padding: 3px 0px;
+
+                        div {
+                            white-space: nowrap;
+                            // width: 200px;
+                            overflow: hidden;
+                            text-overflow: ellipsis;
+                        }
+                    }
+
+                    .editBtnContainer {
+                        display: flex;
+                        width: 100%;
+                        flex-direction: row;
+                        justify-content: space-between;
+                        align-items: center;
+                        margin-top: 10px;
+
+                        .btn {
+                            padding: 10px;
+                            width: 75px;
+                            display: flex;
+                            justify-content: center;
+                            align-items: center;
+                            background-color: #9cd1d9;
+                            border-radius: 5px;
+                            color: #21262d;
+                            font-weight: bold;
+                            cursor: pointer;
+                            margin: 0px 20px;
+
+                            &:hover {
+                                background-color: #00bcd4;
+                                color: white;
+                            }
+                        }
+
+                        @media screen and (max-width: 768px) {
+                            flex-direction: column;
+                            align-items: flex-start;
+                            .btn {
+                                margin: 0px;
+                            }
+                        }
+                    }
+                }
+                .teachers_profile_card_rating {
+                    display: flex;
+                    flex-direction: row;
+                    align-items: center;
+                    padding: 3px 0px;
+                    margin: 3px 0px;
+                    span {
+                        margin-left: 10px;
+                    }
+                }
+                .teachers_profile_card_orgs {
+                    display: flex;
+                    flex-direction: row;
+                    align-items: center;
+                    padding: 3px 0px;
+                    span {
+                        margin-left: 10px;
+                    }
+                }
+            }
+
+            @media screen and (max-width: 768px) {
+                flex-direction: column;
+                align-items: center;
+                .teachers_profile_body_left_image {
+                    width: 200px;
+                    height: 200px;
+                    margin-bottom: 20px;
+                }
+            }
+        }
+        .teachers_profile_body_right_container {
+            flex: 1;
+            height: calc(100vh - 100px);
+            overflow-y: scroll;
+            padding-left: 20px;
+            padding-right: 20px;
+            // background-color: #00bcd4;
+
+            .about_teacher {
+                margin: 20px 20px;
+                padding: 20px;
+                display: flex;
+                flex-direction: column;
+                justify-content: flex-start;
+                align-items: flex-start;
+
+                .about_teacher_header {
+                    font-size: 20px;
+                    font-weight: bold;
+                    margin-bottom: 10px;
+                }
+
+                .about_teacher_body {
+                    font-size: 16px;
+                    margin-bottom: 10px;
+                    text-align: justify;
+                }
+            }
+            .courses {
+                margin: 20px 20px;
+                padding: 20px;
+                display: flex;
+                flex-direction: column;
+                justify-content: flex-start;
+                align-items: flex-start;
+
+                .courses_header {
+                    font-size: 20px;
+                    font-weight: bold;
+                    margin-bottom: 10px;
+                    padding: 20px 0;
+                    text-align: left;
+                }
+
+                .courses_options {
+                    width: 100%;
+                    // background-color: #00bcd4;
+                    display: grid;
+                    //grid auto column
+
+                    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+                    grid-gap: 10px;
+                    border-bottom: 1px solid #92c2d9;
+
+                    //media query
+                    @media screen and (max-width: 768px) {
+                        width: 100%;
+                        display: flex;
+                        flex-direction: column;
+                        justify-content: center;
+                        align-items: center;
+                    }
+
+                    .courses_options_box {
+                        box-shadow: 0px 0px 10px #00000029;
+                        width: 90%;
+                        border-radius: 10px;
+                        display: flex;
+                        flex-direction: column;
+
+                        align-items: center;
+                        padding: 10px;
+                        height: 150px;
+                        margin-bottom: 20px;
+
+                        //hover
+                        &:hover {
+                            box-shadow: 0px 0px 10px #00000029;
+                            transform: scale(1.1);
+                        }
+
+                        .iconHolder {
+                            align-self: flex-start;
+                            display: flex;
+                            justify-content: center;
+                            align-items: center;
+                            padding: 10px;
+                            border-radius: 50%;
+                            width: 30px;
+                            height: 30px;
+                            color: #377dff;
+                            background-color: #ebf1ff;
+                        }
+
+                        .courses_middle {
+                            display: flex;
+                            flex-direction: column;
+                            justify-content: center;
+                            align-items: center;
+
+                            border-radius: 5px;
+                            width: 100%;
+                            height: 100%;
+                            color: #5b329c;
+                            font-size: 22px;
+                            font-weight: bold;
+                            cursor: pointer;
+                        }
+
+                        .courses_bottom {
+                            text-align: left;
+
+                            width: 100%;
+                            color: #377dff;
+                        }
+                    }
+                }
+
+                .courses_body {
+                    font-size: 16px;
+                    margin-bottom: 10px;
+                }
+            }
+        }
+    }
+    .courses_card_container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        grid-gap: 10px;
+        padding-bottom: 20px;
+        border-bottom: 1px solid #92c2d9;
+
+        @media screen and (max-width: 768px) {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .course_card {
+            padding: 10px;
+            box-shadow: 0px 0px 10px #00000029;
+            border-radius: 5px;
+            width: 90%;
+
+            .course_name_holder {
+                color: #5b329c;
+                font-size: 18px;
+                font-weight: bold;
+                cursor: pointer;
+            }
+        }
+    }
+}

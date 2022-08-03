@@ -1,0 +1,11 @@
+.working_on_img {
+	width: 600px;
+	height: auto;
+	margin-bottom: 1rem;
+}
+
+@media only screen and (max-width: 400px) {
+	.working_on_img {
+		width: 300px;
+	}
+}

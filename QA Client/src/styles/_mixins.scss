@@ -1,0 +1,42 @@
+@mixin scrollbarMod1 {
+    overflow-y: scroll;
+    overflow-x: hidden;
+
+    &::-webkit-scrollbar {
+        width: 5px;
+        padding-left: 5px;
+    }
+    
+    &::-webkit-scrollbar-thumb {
+        background: #3b3b3d;
+        border-radius: 10px;
+    }
+}
+
+@mixin TypeBtn {
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    transition: .2s;
+}
+
+@mixin scrollbarLarge {
+    overflow-y: scroll;
+    overflow-x: hidden;
+
+    &::-webkit-scrollbar {
+        width: 10px;
+        padding-left: 15px;
+    }
+    
+    &::-webkit-scrollbar-thumb {
+        background: #3b3b3d;
+        border-radius: 10px;
+    }
+}
+
+@mixin textWrap {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
