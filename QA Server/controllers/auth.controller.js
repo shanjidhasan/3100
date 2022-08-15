@@ -10,7 +10,7 @@ module.exports = {
 					data: {
 						email: user.email,
 					},
-					message: "User created successfully",
+					message: "SignUp successful",
 				});
 			})
 			.catch((err) => {

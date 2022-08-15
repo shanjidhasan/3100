@@ -7,7 +7,7 @@ import Header from "../../../TeacherPage/components/header/Header";
 import { useNavigate } from "react-router-dom";
 
 function FormPage() {
-    const uuid = window.location.pathname.split("/")[2];
+    const uuid = window.location.pathname.split("/")[3];
     const [formData, setFormData] = useState({});
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(true);

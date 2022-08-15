@@ -8,6 +8,8 @@ import "./formBody.scss";
 import FormTitleDescription from "./../form_components/form_title_desc/FormTitleDescription";
 import QuestionCard from "../form_components/question_card/QuestionCard";
 import { useNavigate } from "react-router-dom";
+import Toast from "../../toast/Toast";
+import { createToastMessage } from "../../../utils/toastUtil";
 
 function FormBody({ user, formData }) {
 	const [formUuid, setFormUuid] = useState(formData.uuid);
@@ -18,8 +20,11 @@ function FormBody({ user, formData }) {
 	const [formTotalmarks, setFormTotalmarks] = useState(
 		formData.total_marks
 	);
-	
+
 	const [questions, setQuestions] = useState([]);
+
+	const [toastList, setToastList] = useState([]);
+	const [position, setPosition] = useState("bottom-right");
 
 	const navigate = useNavigate();
 
@@ -31,8 +36,22 @@ function FormBody({ user, formData }) {
 			.then((res) => {
 				console.log(res);
 				setQuestions([...questions, res.data.data]);
+				createToastMessage(
+					"success",
+					"Success",
+					res.data.message,
+					toastList,
+					setToastList
+				);
 			})
 			.catch((err) => {
+				createToastMessage(
+					"error",
+					"Error",
+					err.response.data.error,
+					toastList,
+					setToastList
+				);
 				console.log(err);
 			});
 	};
@@ -40,19 +59,33 @@ function FormBody({ user, formData }) {
 	const handleDeleteQuestion = (questionId) => {
 		console.log(questionId);
 		deleteQuestion({ token: user.token, questionId: questionId })
-		
+
 			.then((res) => {
 				console.log(questionId);
 				// setQuestions(
 				// 	res.data.data
 				// );
 				// delete only the question from the questions array
+				createToastMessage(
+					"success",
+					"Success",
+					res.data.message,
+					toastList,
+					setToastList
+				);
 				setQuestions([])
 				setQuestions(res.data.data["questions"]);
 				setFormTotalmarks(res.data.data["total_marks"]);
 				console.log(questions);
 			})
 			.catch((err) => {
+				createToastMessage(
+					"error",
+					"Error",
+					err.response.data.error,
+					toastList,
+					setToastList
+				);
 				console.log(err);
 			});
 	};
@@ -88,51 +121,77 @@ function FormBody({ user, formData }) {
 		})
 			.then((res) => {
 				console.log(res.data);
+				
+				createToastMessage(
+					"success",
+					"Success",
+					res.data.message,
+					toastList,
+					setToastList
+				);
 			})
 			.catch((err) => {
 				console.log(err);
+				createToastMessage(
+					"error",
+					"Error",
+					err.response.data.error,
+					toastList,
+					setToastList
+				);
 			});
 	};
 
 	return (
-		<div className="form_body_container">
-		
-			<FormTitleDescription
-				formTitle={title}
-				formDescription={description}
-				formDue={formDue}
-				formPassMark={formPassMark}
-				formTotalmarks={formTotalmarks}
-				handleChange={handleChangeInfo}
-				handleUpdateInfo={handleUpdateInfo}
-				examUUID={formUuid}
-				navigate={navigate}
-			/>
-			{questions &&
-				questions.map((question, index) => {
-					return (
-						<QuestionCard
-							key={index}
-							question={question}
-							index={index}
-							userId={user.id}
-							token={user.token}
-							setFormTotalmarks={setFormTotalmarks}
-							examUUID={formData.uuid}
-							handleDeleteQuestion={handleDeleteQuestion}
-							isPreview={false}
-						/>
-					);
-				})}
-			<div className="add_question_container">
-				<button
-					className="add_question_button"
-					onClick={handleAddQuestion}
-				>
-					Add Question
-				</button>
+		<>
+			<div className="form_body_container">
+
+				<FormTitleDescription
+					formTitle={title}
+					formDescription={description}
+					formDue={formDue}
+					formPassMark={formPassMark}
+					formTotalmarks={formTotalmarks}
+					handleChange={handleChangeInfo}
+					handleUpdateInfo={handleUpdateInfo}
+					examUUID={formUuid}
+					navigate={navigate}
+				/>
+				{questions &&
+					questions.map((question, index) => {
+						return (
+							<QuestionCard
+								key={index}
+								question={question}
+								index={index}
+								userId={user.id}
+								token={user.token}
+								setFormTotalmarks={setFormTotalmarks}
+								examUUID={formData.uuid}
+								handleDeleteQuestion={handleDeleteQuestion}
+								toastList={toastList}
+								setToastList={setToastList}
+								isPreview={false}
+							/>
+						);
+					})}
+				<div className="add_question_container">
+					<button
+						className="add_question_button"
+						onClick={handleAddQuestion}
+					>
+						Add Question
+					</button>
+				</div>
 			</div>
-		</div>
+
+			<Toast
+				toastList={toastList}
+				position={position}
+				autoDelete={true}
+				autoDeleteTime={2000}
+			/>
+		</>
 	);
 }
 

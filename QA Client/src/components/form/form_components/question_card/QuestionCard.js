@@ -1,5 +1,7 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
+import { loadStorage, saveStorage } from "../../../../utils/persistLocalStorage";
+import { createToastMessage } from "../../../../utils/toastUtil";
 import { MAT_URL, UPDATE_QUESTION_URL } from "../../../../utils/urls";
 import "./questionCard.scss";
 
@@ -11,18 +13,15 @@ function QuestionCard({
 	setFormTotalmarks,
 	examUUID,
 	handleDeleteQuestion,
+	toastList,
+	setToastList,
 	isPreview,
+	isResponse,
 }) {
+
 	const [questionText, setQuestionText] = useState(
 		question.question_text || ""
 	);
-
-	const [questionMaterial, setQuestionMaterial] = useState(
-		question.question_material
-	);
-	const [questionFile, setQuestionFile] = useState();
-	const [questionFileType, setQuestionFileType] = useState();
-	const [questioFilePreview, setQuestionFilePreview] = useState();
 
 	const [questionType, setQuestionType] = useState(question.type);
 	const [questionDescription, setQuestionDescription] = useState(
@@ -39,63 +38,10 @@ function QuestionCard({
 
 	const [questionMarks, setQuestionMarks] = useState(question.marks);
 
-	const [questionAnswerMaterial, setQuestionAnswerMaterial] = useState(
-		question.answer_material
-	);
-	const [questionAnswerFile, setQuestionAnswerFile] = useState();
-	const [questionAnswerFileType, setQuestionAnswerFileType] = useState();
-	const [questionAnswerFilePreview, setQuestionAnswerFilePreview] =
-		useState();
-
 	const [questionVisible, setQuestionVisible] = useState(question.is_active);
-	const [questionRequired, setQuestionRequired] = useState(
-		question.is_required
-	);
 
 	const newOption = "Option";
 	console.log(question);
-
-	useEffect(() => {
-		if (!questionFile) {
-			setQuestionFilePreview(undefined);
-			return;
-		}
-
-		const objectUrl = URL.createObjectURL(questionFile);
-		setQuestionFilePreview(objectUrl);
-
-		// free memory when ever this component is unmounted
-		return () => URL.revokeObjectURL(objectUrl);
-	}, [questionFile]);
-
-	useEffect(() => {
-		if (!questionAnswerFile) {
-			setQuestionAnswerFilePreview(undefined);
-			return;
-		}
-
-		const objectUrl = URL.createObjectURL(questionAnswerFile);
-		setQuestionAnswerFilePreview(objectUrl);
-
-		// free memory when ever this component is unmounted
-		return () => URL.revokeObjectURL(objectUrl);
-	}, [questionAnswerFile]);
-
-	const handleQuestionFileChange = (event) => {
-		setQuestionFile(event.target.files[0]);
-		setQuestionFileType(event.target.files[0]?.type);
-
-		setQuestionMaterial(undefined);
-	};
-
-	const clearQuestionFile = () => {
-		setQuestionFile(undefined);
-		setQuestionFilePreview(undefined);
-	};
-
-	const clearQuestionMaterial = () => {
-		setQuestionMaterial(undefined);
-	};
 
 	const handleQuestionTypeChange = (e) => {
 		setQuestionType(e.target.value);
@@ -143,63 +89,24 @@ function QuestionCard({
 		setQuestionAnswerOptions(newAnswerOptions);
 	};
 
-	const handleAnswerFileChange = (event) => {
-		setQuestionAnswerFile(event.target.files[0]);
-		setQuestionAnswerFileType(event.target.files[0]?.type);
-
-		setQuestionAnswerMaterial(undefined);
-	};
-
-	const clearAnswerFile = () => {
-		setQuestionAnswerFile(undefined);
-		setQuestionAnswerFilePreview(undefined);
-	};
-
-	const clearAnswerMaterial = () => {
-		setQuestionAnswerMaterial(undefined);
-	};
-
 	const toggleVisibility = () => {
 		setQuestionVisible(!questionVisible);
 	};
 
-	const toggleRequired = () => {
-		setQuestionRequired(!questionRequired);
-	};
-
 	const handleUpdateQuestion = () => {
-		var questionMaterialCleared = false;
-		if (!questionMaterial && !questionFile) {
-			questionMaterialCleared = true;
-		}
-
-		var questionAnswerMaterialCleared = false;
-		if (!questionAnswerMaterial && !questionAnswerFile) {
-			questionAnswerMaterialCleared = true;
-		}
 
 		var formData = new FormData();
 		formData.append("userId", userId);
 		formData.append("questionId", question.id);
 		formData.append("examUUID", examUUID);
 		formData.append("questionText", questionText);
-		formData.append("questionFile", questionFile);
-		formData.append("questionFileType", questionFileType);
 		formData.append("questionType", questionType);
 		formData.append("questionDescription", questionDescription);
 		formData.append("questionMarks", questionMarks);
 		formData.append("questionAnswer", questionAnswer);
 		formData.append("questionOptions", questionOptions);
 		formData.append("questionAnswerOptions", questionAnswerOptions);
-		formData.append("questionAnswerFile", questionAnswerFile);
-		formData.append("questionAnswerFileType", questionAnswerFileType);
 		formData.append("questionVisible", questionVisible);
-		formData.append("questionRequired", questionRequired);
-		formData.append("questionMaterialCleared", questionMaterialCleared);
-		formData.append(
-			"questionAnswerMaterialCleared",
-			questionAnswerMaterialCleared
-		);
 
 		axios({
 			method: "put",
@@ -214,10 +121,94 @@ function QuestionCard({
 				console.log(res.data);
 				console.log(res.data.data.exam);
 				setFormTotalmarks(res.data.data.exam.total_marks);
+				createToastMessage(
+					"success",
+					"Success",
+					res.data.message,
+					toastList,
+					setToastList
+				);
 			})
 			.catch((err) => {
+				createToastMessage(
+					"error",
+					"Error",
+					err.response.data.error,
+					toastList,
+					setToastList
+				);
 				console.log(err);
 			});
+	};
+
+	const [answer, setAnswer] = useState("");
+	var answerOptions = [];
+
+	useEffect(() => {
+		if (isPreview && question.type === "multiple_choice") {
+			for (let i = 0; i < questionOptions.length; i++) {
+				answerOptions.push(false);
+			}
+		}
+	}, []);
+
+	useEffect(() => {
+		if (isPreview) {
+			handleAnswerTextChange(answer);
+		}
+	}, [answer]);
+
+	const handleAnswerTextChange = (answer) => {
+		var answerList = loadStorage("answerList")
+		console.log(answerList)
+
+		var found = false;
+		for (let i = 0; i < answerList.length; i++) {
+			// 	// this.setState({
+			// 	// 	text: event.target.value
+			// 	//   }, () => {
+			// 	// 	console.log("New state in ASYNC callback:", this.state.text);
+			// 	//   });
+			if (answerList[i].q_id === question.id) {
+				answerList[i].answer = answer;
+				found = true;
+			}
+
+		}
+		if (!found) {
+			var ansObj = {
+				q_id: question.id,
+				answer: answer,
+			}
+			answerList.push(ansObj)
+		}
+		saveStorage("answerList", answerList)
+	};
+
+	const handleMultipleChoiceAnswerChange = (answer, idx) => {
+		console.log(answer, idx);
+		var answerList = loadStorage("answerList")
+		console.log(answerList)
+
+		var found = false;
+		answerOptions[idx] = answer;
+		// 
+		// list to string
+		var answerListStr = answerOptions.join(",");
+		for (let i = 0; i < answerList.length; i++) {
+			if (answerList[i].q_id === question.id) {
+				answerList[i].answer = answerListStr
+				found = true;
+			}
+		}
+		if (!found) {
+			var ansObj = {
+				q_id: question.id,
+				answer: answerListStr,
+			}
+			answerList.push(ansObj)
+		}
+		saveStorage("answerList", answerList)
 	};
 
 	return (
@@ -228,7 +219,7 @@ function QuestionCard({
 						<span className="question_index">{index + 1}</span>
 						<div className="question_text_container">
 							<label>Question</label>
-							<textarea
+							{!isPreview || !isResponse ? <textarea
 								type="text"
 								name="question"
 								className="question_text"
@@ -237,213 +228,86 @@ function QuestionCard({
 								onChange={(e) =>
 									setQuestionText(e.target.value)
 								}
-								disabled={isPreview}
+								disabled={isPreview || isResponse}
 							></textarea>
+								: <span>{question.question_text}</span>
+							}
 						</div>
 					</div>
 					{!isPreview && (
 						<>
-							<div className="question_file">
-								<label htmlFor="fileInput">
-									Upload Question
-								</label>
-								<input
-									type="file"
-									id="fileInput"
-									name="question_file"
-									accept={["image/*", "application/pdf"]}
-									onChange={handleQuestionFileChange}
-								/>
-							</div>
 							<div className="question_type">
 								<label>Answer Type</label>
 								<select
 									name="question_type"
 									onChange={handleQuestionTypeChange}
 									value={questionType}
+									disabled={isPreview || isResponse}
 								>
 									<option value="text">Text</option>
 									<option value="multiple_choice">
 										Multiple Choice
 									</option>
-									<option value="checkbox">Checkbox</option>
-									<option value="dropdown">Dropdown</option>
-									<option value="file_upload">
-										File Upload
-									</option>
 								</select>
 							</div>
 						</>
 					)}
-				</div>
-				<div className="preview_row">
-					{questionMaterial && questionFile && (
-						<>
-							{questionFileType.match("image") ? (
-								<div
-									style={{
-										display: "flex",
-										flexDirection: "column",
-									}}
-								>
-									<img
-										className="previewImg"
-										src={questioFilePreview}
-										alt="Question Preview"
-										style={{
-											width: "250px",
-											height: "250px",
-											marginBottom: "10px",
-										}}
-									/>
-									<span>Question Preview</span>
-								</div>
-							) : questionFileType === "application/pdf" ? (
-								<div
-									style={{
-										display: "flex",
-										flexDirection: "column",
-									}}
-								>
-									<iframe
-										title="question_preview"
-										src={questioFilePreview}
-										style={{
-											width: "350px",
-											height: "350px",
-										}}
-									></iframe>
-									<span>Question Preview</span>
-								</div>
-							) : null}
-							{/* add clear button */}
-							<button
-								className="clearButton"
-								onClick={clearQuestionFile}
-							>
-								<i className="fas fa-times" /> Clear
-							</button>
-						</>
-					)}
-					{questionMaterial && !questionFile && (
-						<>
-							{questionMaterial.file_type.match("image") ? (
-								<div
-									style={{
-										display: "flex",
-										flexDirection: "column",
-									}}
-								>
-									<img
-										className="previewImg"
-										src={
-											MAT_URL + questionMaterial.file_path
-										}
-										alt="Question Preview"
-										style={{
-											width: "250px",
-											height: "250px",
-											marginBottom: "10px",
-										}}
-									/>
-									<span>Question Preview</span>
-								</div>
-							) : questionMaterial.file_type ===
-							  "application/pdf" ? (
-								<div
-									style={{
-										display: "flex",
-										flexDirection: "column",
-									}}
-								>
-									<iframe
-										title="question_preview"
-										src={
-											MAT_URL + questionMaterial.file_path
-										}
-										style={{
-											width: "350px",
-											height: "350px",
-										}}
-									></iframe>
-									<span>Question Preview</span>
-								</div>
-							) : null}
-							{/* add clear button */}
-							<button
-								className="clearButton"
-								onClick={clearQuestionMaterial}
-							>
-								<i className="fas fa-times" /> Clear
-							</button>
-						</>
-					)}
-					{!questionMaterial && questionFile && (
-						<>
-							{questionFileType.match("image") ? (
-								<div
-									style={{
-										display: "flex",
-										flexDirection: "column",
-									}}
-								>
-									<img
-										className="previewImg"
-										src={questioFilePreview}
-										alt="Question Preview"
-										style={{
-											width: "250px",
-											height: "250px",
-											marginBottom: "10px",
-										}}
-									/>
-									<span>Question Preview</span>
-								</div>
-							) : questionFileType === "application/pdf" ? (
-								<div
-									style={{
-										display: "flex",
-										flexDirection: "column",
-									}}
-								>
-									<iframe
-										title="question_preview"
-										src={questioFilePreview}
-										style={{
-											width: "350px",
-											height: "350px",
-										}}
-									></iframe>
-									<span>Question Preview</span>
-								</div>
-							) : null}
-							<button
-								className="clearButton"
-								onClick={clearQuestionFile}
-							>
-								<i className="fas fa-times" /> Clear
-							</button>
-						</>
-					)}
+
+					{isPreview && <div className="question_marks">
+						<label>Marks</label>
+						<span>{question.marks}</span>
+					</div>}
 				</div>
 			</div>
 
 			<div className="card_mid">
 				<div className="desc_row">
+					{
+						isResponse && (
+							<>
+								<div className="question_marks">
+									<label>Question Marks</label>
+									<input
+										type="number"
+										id="question_marks"
+										name="marks"
+										placeholder="Enter marks"
+										value={questionMarks}
+										disabled={true}
+									/>
+								</div><div className="question_marks">
+									<label>Obtained Marks</label>
+									<input
+										type="number"
+										id="question_marks"
+										name="marks"
+										placeholder="Enter marks"
+										value={question.ob_marks || "0"}
+										disabled={true}
+									/>
+								</div>
+							</>
+						)
+					}
 					<div className="question_desc">
-						<label>Question Description</label>
-						<input
-							type="text"
-							id="question_description"
-							name="description"
-							placeholder="Write something..."
-							value={questionDescription}
-							onChange={handleQuestionDescriptionChange}
-							disabled={isPreview}
-						/>
+						{!isPreview && !isResponse ?
+							<>
+								<label>Question Description</label>
+								<input
+									type="text"
+									id="question_description"
+									name="description"
+									placeholder="Write something..."
+									value={questionDescription}
+									onChange={handleQuestionDescriptionChange}
+									disabled={isPreview}
+								/>
+							</>
+							: <span>{questionDescription}</span>
+						}
 					</div>
 
-					<div className="question_marks">
+					{!isPreview && !isResponse && <div className="question_marks">
 						<label>Marks</label>
 						<input
 							type="number"
@@ -454,23 +318,46 @@ function QuestionCard({
 							onChange={handleQuestionMarksChange}
 							disabled={isPreview}
 						/>
-					</div>
+					</div>}
 				</div>
 
 				<div className="question_answer">
 					<div className="text_container">
 						{questionType === "text" && (
-							<div className="text_input">
-								<label>Answer</label>
-								<textarea
-									type="text"
-									name="question_answer"
-									placeholder="Answer"
-									value={questionAnswer}
-									onChange={handleQuestionAnswerChange}
-									disabled={isPreview}
-								></textarea>
-							</div>
+							<>
+								<div className="text_input">
+									<label>Answer</label>
+									<textarea
+										type="text"
+										name="question_answer"
+										placeholder="Answer"
+										value={isPreview ? answer : isResponse ? questionAnswer : questionAnswer}
+										onChange={
+											(e) => {
+												if (isPreview) {
+													setAnswer(e.target.value);
+												} else {
+													handleQuestionAnswerChange(e);
+												}
+											}
+										}
+										disabled={isResponse}
+									></textarea>
+								</div>
+								{
+									isResponse && (
+										<div className="text_input">
+											<label>Correct Answer</label>
+											<textarea
+												type="text"
+												name="question_answer"
+												placeholder="Answer"
+												value={question.student_answer}
+												disabled={true}
+											></textarea>
+										</div>)
+								}
+							</>
 						)}
 					</div>
 
@@ -483,10 +370,16 @@ function QuestionCard({
 										key={optIdx}
 									>
 										<input
-											type="radio"
+											type="checkbox"
 											className="radio"
 											name="question_answer"
-											disabled
+											disabled={!isPreview && !isResponse}
+											checked={isResponse && question.student_answer[optIdx] === "true"}
+											onChange={(e) => {
+												if (isPreview) {
+													handleMultipleChoiceAnswerChange(e.target.checked, optIdx);
+												}
+											}}
 										/>
 
 										<input
@@ -496,49 +389,51 @@ function QuestionCard({
 											onChange={(e) => {
 												updateOption(e, optIdx);
 											}}
-											disabled={isPreview}
+											disabled={isPreview || isResponse}
 										/>
 
+										{!isPreview && !isResponse && (
+
+											<div
+												className="delete"
+												title="Delete Option"
+												onClick={(e) => {
+													removeOption(optIdx);
+												}}
+											>
+												<i className="fas fa-times" />
+											</div>
+										)}
 										{!isPreview && (
-											<>
-												<div
-													className="delete"
-													title="Delete Option"
-													onClick={(e) => {
-														removeOption(optIdx);
+											<div
+												className="answer"
+												title={isResponse ? "Selected as Answer" : "Select as Answer"}
+											>
+												<input
+													type="checkbox"
+													checked={
+														questionAnswerOptions[
+														optIdx
+														] === "true"
+													}
+													onChange={(e) => {
+														handleOptionAnswerChange(
+															e,
+															optIdx
+														);
 													}}
-												>
-													<i className="fas fa-times" />
-												</div>
-												<div
-													className="answer"
-													title="Select as Answer"
-												>
-													<input
-														type="checkbox"
-														checked={
-															questionAnswerOptions[
-																optIdx
-															] === "true"
-														}
-														onChange={(e) => {
-															handleOptionAnswerChange(
-																e,
-																optIdx
-															);
-														}}
-													/>
-													<label>
-														Select as Answer
-													</label>
-												</div>
-											</>
+													disabled={isResponse}
+												/>
+												<label>
+												{isResponse ? "Selected as Answer" : "Select as Answer"}
+												</label>
+											</div>
 										)}
 									</div>
 								);
 							})}
 
-							{!isPreview && (
+							{(!isPreview && !isResponse) && (
 								<div className="add_option_container">
 									<div className="add_option">
 										<button
@@ -550,344 +445,11 @@ function QuestionCard({
 									</div>
 								</div>
 							)}
-						</div>
-					)}
-
-					{questionType === "checkbox" && (
-						<div className="checkbox_container">
-							{questionOptions?.map((option, optIdx) => {
-								return (
-									<div
-										className="checkbox_option"
-										key={optIdx}
-									>
-										<input
-											type="checkbox"
-											className="check"
-											name="question_answer"
-											disabled
-										/>
-
-										<input
-											type="text"
-											className="text"
-											value={option}
-											onChange={(e) => {
-												updateOption(e, optIdx);
-											}}
-										/>
-
-										{!isPreview && (
-											<>
-												<div
-													className="delete"
-													title="Delete Option"
-													onClick={(e) => {
-														removeOption(optIdx);
-													}}
-												>
-													<i className="fas fa-times" />
-												</div>
-												<div
-													className="answer"
-													title="Select as Answer"
-												>
-													<input
-														type="checkbox"
-														checked={
-															questionAnswerOptions[
-																optIdx
-															] === "true"
-														}
-														onChange={(e) => {
-															handleOptionAnswerChange(
-																e,
-																optIdx
-															);
-														}}
-													/>
-													<label>
-														Select as Answer
-													</label>
-												</div>
-											</>
-										)}
-									</div>
-								);
-							})}
-
-							{!isPreview && (
-								<div className="add_option_container">
-									<div className="add_option">
-										<button
-											title="Add a new option"
-											onClick={addNewOption}
-										>
-											+ Add Option
-										</button>
-									</div>
-								</div>
-							)}
-						</div>
-					)}
-
-					{questionType === "dropdown" && (
-						<div className="checkbox_container">
-							{questionOptions?.map((option, optIdx) => {
-								return (
-									<div
-										className="checkbox_option"
-										key={optIdx}
-									>
-										<span>{`${optIdx + 1}.`}</span>
-
-										<input
-											type="text"
-											className="text"
-											value={option}
-											onChange={(e) => {
-												updateOption(e, optIdx);
-											}}
-											disabled={isPreview}
-										/>
-
-										{!isPreview && (
-											<>
-												<div
-													className="delete"
-													title="Delete Option"
-													onClick={(e) => {
-														removeOption(optIdx);
-													}}
-												>
-													<i className="fas fa-times" />
-												</div>
-												<div
-													className="answer"
-													title="Select as Answer"
-												>
-													<input
-														type="checkbox"
-														checked={
-															questionAnswerOptions[
-																optIdx
-															] === "true"
-														}
-														onChange={(e) => {
-															handleOptionAnswerChange(
-																e,
-																optIdx
-															);
-														}}
-													/>
-													<label>
-														Select as Answer
-													</label>
-												</div>
-											</>
-										)}
-									</div>
-								);
-							})}
-
-							{!isPreview && (
-								<div className="add_option_container">
-									<div className="add_option">
-										<button
-											title="Add a new option"
-											onClick={addNewOption}
-										>
-											+ Add Option
-										</button>
-									</div>
-								</div>
-							)}
-						</div>
-					)}
-
-					{questionType === "file_upload" && (
-						<div className="file_upload_container">
-							<div className="upload_container">
-								<label>Answer File</label>
-								<input
-									type="file"
-									accept={["image/*", "application/pdf"]}
-									onChange={handleAnswerFileChange}
-								/>
-							</div>
-							<div className="preview_container">
-								{questionAnswerMaterial && questionAnswerFile && (
-									<>
-										{questionAnswerFileType.match(
-											"image"
-										) ? (
-											<div
-												style={{
-													display: "flex",
-													flexDirection: "column",
-												}}
-											>
-												<img
-													className="previewImg"
-													src={
-														questionAnswerFilePreview
-													}
-													alt="Answer Preview"
-													style={{
-														width: "250px",
-														height: "250px",
-														marginBottom: "10px",
-													}}
-												/>
-												<span>Answer Preview</span>
-											</div>
-										) : questionAnswerFileType ===
-										  "application/pdf" ? (
-											<div
-												style={{
-													display: "flex",
-													flexDirection: "column",
-												}}
-											>
-												<iframe
-													title="Answer Preview"
-													src={
-														questionAnswerFilePreview
-													}
-													style={{
-														width: "350px",
-														height: "350px",
-													}}
-												></iframe>
-												<span>Answer Preview</span>
-											</div>
-										) : null}
-										{/* add clear button */}
-										<button
-											className="clearButton"
-											onClick={clearAnswerFile}
-										>
-											<i className="fas fa-times" /> Clear
-										</button>
-									</>
-								)}
-								{questionAnswerMaterial && !questionAnswerFile && (
-									<>
-										{questionAnswerMaterial.file_type.match(
-											"image"
-										) ? (
-											<div
-												style={{
-													display: "flex",
-													flexDirection: "column",
-												}}
-											>
-												<img
-													className="previewImg"
-													src={
-														MAT_URL +
-														questionAnswerMaterial.file_path
-													}
-													alt="Answer Preview"
-													style={{
-														width: "250px",
-														height: "250px",
-														marginBottom: "10px",
-													}}
-												/>
-												<span>Answer Preview</span>
-											</div>
-										) : questionAnswerMaterial.file_type ===
-										  "application/pdf" ? (
-											<div
-												style={{
-													display: "flex",
-													flexDirection: "column",
-												}}
-											>
-												<iframe
-													title="Answer Preview"
-													src={
-														MAT_URL +
-														questionAnswerMaterial.file_path
-													}
-													style={{
-														width: "350px",
-														height: "350px",
-													}}
-												></iframe>
-												<span>Answer Preview</span>
-											</div>
-										) : null}
-										{/* add clear button */}
-										<button
-											className="clearButton"
-											onClick={clearAnswerMaterial}
-										>
-											<i className="fas fa-times" /> Clear
-										</button>
-									</>
-								)}
-								{!questionAnswerMaterial && questionAnswerFile && (
-									<>
-										{questionAnswerFileType.match(
-											"image"
-										) ? (
-											<div
-												style={{
-													display: "flex",
-													flexDirection: "column",
-												}}
-											>
-												<img
-													className="previewImg"
-													src={
-														questionAnswerFilePreview
-													}
-													alt="Answer Preview"
-													style={{
-														width: "250px",
-														height: "250px",
-														marginBottom: "10px",
-													}}
-												/>
-												<span>Answer Preview</span>
-											</div>
-										) : questionAnswerFileType ===
-										  "application/pdf" ? (
-											<div
-												style={{
-													display: "flex",
-													flexDirection: "column",
-												}}
-											>
-												<iframe
-													title="Answer Preview"
-													src={
-														questionAnswerFilePreview
-													}
-													style={{
-														width: "350px",
-														height: "350px",
-													}}
-												></iframe>
-												<span>Answer Preview</span>
-											</div>
-										) : null}
-										<button
-											className="clearButton"
-											onClick={clearAnswerFile}
-										>
-											<i className="fas fa-times" /> Clear
-										</button>
-									</>
-								)}
-							</div>
 						</div>
 					)}
 				</div>
 			</div>
-			{!isPreview && (
+			{!isPreview && !isResponse && (
 				<div className="card_bottom">
 					<div
 						className="btn"
@@ -915,16 +477,6 @@ function QuestionCard({
 							onChange={toggleVisibility}
 						/>
 					</div>
-					{/* <div className="card_bottom_option">
-						<span>Required</span>
-						<input
-							type="checkbox"
-							title="If checked, the question will be required to be answered"
-							name="required"
-							defaultChecked={questionRequired}
-							onChange={toggleRequired}
-						/>
-					</div> */}
 				</div>
 			)}
 		</div>

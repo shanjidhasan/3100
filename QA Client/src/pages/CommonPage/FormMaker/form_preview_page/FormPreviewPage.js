@@ -15,7 +15,7 @@ function FormPreviewPage() {
 	const navigate = useNavigate();
 
 	useEffect(() => {
-		user = loadStorage("user");
+		console.log("User"+{user});
 		getFormData({
 			token: user.token,
 			edit: false,
@@ -23,6 +23,7 @@ function FormPreviewPage() {
 			uuid: uuid,
 		})
 			.then((res) => {
+				console.log("hereeeeeee"+{user});
 				console.log(res.data.data);
 				setFormData(res.data.data);
 				setLoading(false);

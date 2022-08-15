@@ -47,11 +47,26 @@ module.exports = {
 				});
 			});
 	},
+	getFormPreviewData: async (req, res) => {
+		ExamService.getFormPreviewData(req.params, req.body, res.locals.id)
+			.then((response) => {
+				return res.status(200).json({
+					message: "Successfully fetched form data",
+					data: response,
+				});
+			})
+			.catch((err) => {
+				res.status(500).json({
+					message: "Error fetching information",
+					error: err.message,
+				});
+			});
+	},
 	updateFormInfo: async (req, res) => {
 		ExamService.updateFormInfo(req.body)
 			.then((response) => {
 				return res.status(200).json({
-					message: "Form title updated successfully",
+					message: "Form info updated successfully",
 					data: response,
 				});
 			})
@@ -152,4 +167,95 @@ module.exports = {
 				});
 			});
 	},
+	submitForm: async (req, res) => {
+		ExamService.submitForm(req.body, res.locals.id)
+			.then((response) => {
+				return res.status(200).json({
+					message: "Exam created successfully",
+					data: response,
+				});
+			})
+			.catch((err) => {
+				console.log(err);
+				res.status(500).json({
+					message: "Error creating exam",
+					error: err.message,
+				});
+			});
+	},
+	get_form_response_data_by_exam_id_and_student_id: async (req, res) => {
+		ExamService.get_form_response_data_by_exam_id_and_student_id(req.body, res.locals.id)
+			.then((response) => {
+				return res.status(200).json({
+					message: "Exam created successfully",
+					data: response,
+				});
+			})
+			.catch((err) => {
+				console.log(err);
+				res.status(500).json({
+					message: "Error creating exam",
+					error: err.message,
+				});
+			});
+	},
+	get_all_responses_by_exam_id: async (req, res) => {
+		ExamService.get_all_responses_by_exam_id(req.params)
+			.then((response) => {
+				return res.status(200).json({
+					message: "Successfully fetched form data",
+					data: response,
+				});
+			})
+			.catch((err) => {
+				res.status(500).json({
+					message: "Error fetching information",
+					error: err.message,
+				});
+			});
+	},
+	get_all_responses_by_student_id: async (req, res) => {
+		ExamService.get_all_responses_by_student_id(res.locals.id)
+			.then((response) => {
+				return res.status(200).json({
+					message: "Successfully fetched form data",
+					data: response,
+				});
+			})
+			.catch((err) => {
+				res.status(500).json({
+					message: "Error fetching information",
+					error: err.message,
+				});
+			});
+	},
+	getUUID: async (req, res) => {
+
+        ExamService.getUUID(req.params, res.locals.id)
+
+            .then((response) => {
+
+                return res.status(200).json({
+
+                    message: "Successfully fetched form data",
+
+                    data: response,
+
+                });
+
+            })
+
+            .catch((err) => {
+
+                res.status(500).json({
+
+                    message: "Error fetching information",
+
+                    error: err.message,
+
+                });
+
+            });
+
+    },
 };

@@ -6,7 +6,7 @@ const Exam = database.define(
 	"Exam",
 	{
 		uuid: {
-			type: Sequelize.UUID,
+			type: DataTypes.STRING,
 			allowNull: false,
 			unique: true,
 		},

@@ -21,17 +21,25 @@
 
     .form_list {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
         column-gap: 0.8rem;
         row-gap: 1.5rem;
         flex-direction: row;
-        justify-content: flex-start;
+        justify-items: center;
 
-        @media screen and (max-width: 650px) {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
+        @media screen and (max-width: 1300px) {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr;
+        }
+
+        @media screen and (max-width: 1050px) {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+        }
+
+        @media screen and (max-width: 750px) {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
         }
 
         .form_item {

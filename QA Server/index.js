@@ -14,6 +14,7 @@ const User = require("./models/user.model");
 const Question = require("./models/question.model");
 const Material = require("./models/material.model");
 const Exam = require("./models/exam.model");
+const Answer = require("./models/answer.model");
 
 
 database

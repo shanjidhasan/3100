@@ -130,8 +130,8 @@ exports.signUpUser = async function (user_data) {
 };
 
 exports.verifyUser = async function (data) {
-	const { email, otpCode, resetPassword } = data;
-	// console.log(data);
+	const { email, code, resetPassword } = data;
+	console.log(data);
 	var user = await User.findOne({
 		where: {
 			email: email,
@@ -140,7 +140,8 @@ exports.verifyUser = async function (data) {
 	if (!user) {
 		throw new Error("User does not exist");
 	}
-	if (user.otp_code != otpCode) {
+	console.log(user.otp_code + " " + code);
+	if (user.otp_code !== code) {
 		// console.log("OTP does not match");
 		throw new Error("OTP does not match");
 	}
@@ -327,7 +328,8 @@ exports.changePassword = async function (user_data) {
 
 
 exports.resetPassword = async function (data) {
-	const { email, otpCode, newPassword, confirmPassword } = data;
+	const { email, newPassword, confirmPassword } = data;
+	console.log(data)
 	var user = await User.findOne({
 		where: {
 			email: email,
@@ -341,9 +343,6 @@ exports.resetPassword = async function (data) {
 	}
 	if (!user.is_verified) {
 		throw new Error("User is not verified");
-	}
-	if (user.otp_code != otpCode) {
-		throw new Error("Invalid OTP Code");
 	}
 	if (newPassword.length < 6) {
 		throw new Error("Password must be atleast 6 characters long");

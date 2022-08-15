@@ -8,6 +8,7 @@ import {
 	GET_RESET_PASSWORD_CODE_URL,
 	RESET_PASSWORD_URL,
 	VERIFY_RESET_PASSWORD_URL,
+	CHANGE_PASSWORD_URL,
 } from "../utils/urls";
 
 export const signUpUser = (user_data) => {
@@ -42,4 +43,8 @@ export const verifyResetPasswordCode = (data) => {
 
 export const resetPassword = (data) => {
 	return axios.post(RESET_PASSWORD_URL, data);
+};
+export const changePassword = (data) => {
+	console.log(data);
+	return axios.post(CHANGE_PASSWORD_URL, data);
 };

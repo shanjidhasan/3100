@@ -16,3 +16,60 @@ export const randomValue = (val = 6) => {
         return rand
     }
 }
+
+export const formatDate = (dueDateTime) => {
+    const date = new Date(dueDateTime);
+    const day = date.getDate();
+    const monthList = [
+        "Jan",
+        "Feb",
+        "Mar",
+        "Apr",
+        "May",
+        "Jun",
+        "July",
+        "Aug",
+        "Sep",
+        "Oct",
+        "Nov",
+        "Dec",
+    ];
+    const textMonth = monthList[date.getMonth()];
+    const year = date.getFullYear();
+    const hour = date.getHours();
+    const minute = date.getMinutes();
+    const ampm = hour >= 12 ? "PM" : "AM";
+    const hour12 = hour % 12;
+    const sHours = hour12 < 10 ? `0${hour12}` : hour12;
+    const sMinutes = minute < 10 ? `0${minute}` : minute;
+    const formattedTime = `${sHours}:${sMinutes} ${ampm}`;
+    return `${textMonth} ${day}, ${year}`;
+};
+export const formatDateTime = (dueDateTime) => {
+    const date = new Date(dueDateTime);
+    const day = date.getDate();
+    const monthList = [
+        "Jan",
+        "Feb",
+        "Mar",
+        "Apr",
+        "May",
+        "Jun",
+        "July",
+        "Aug",
+        "Sep",
+        "Oct",
+        "Nov",
+        "Dec",
+    ];
+    const textMonth = monthList[date.getMonth()];
+    const year = date.getFullYear();
+    const hour = date.getHours();
+    const minute = date.getMinutes();
+    const ampm = hour >= 12 ? "PM" : "AM";
+    const hour12 = hour % 12;
+    const sHours = hour12 < 10 ? `0${hour12}` : hour12;
+    const sMinutes = minute < 10 ? `0${minute}` : minute;
+    const formattedTime = `${sHours}:${sMinutes} ${ampm}`;
+    return `${textMonth} ${day}, ${year} ${formattedTime}`;
+};

@@ -9,6 +9,8 @@ import {
 	resetPassword,
 	verifyResetPasswordCode,
 } from "../../../api/auth.api";
+import Toast from "../../../components/toast/Toast";
+import { createToastMessage } from "../../../utils/toastUtil";
 
 function ResetPassword() {
 	const [email, setEmail] = useState("");
@@ -20,7 +22,8 @@ function ResetPassword() {
 	const [resetSuccessful, setResetSuccessful] = useState(false);
 	const [formError, setFormError] = useState(null);
 	const [isLoading, setIsLoading] = useState(false);
-
+	const [toastList, setToastList] = useState([]);
+	const [position, setPosition] = useState("bottom-right");
 	const navigate = useNavigate();
 
 	const handleEmailSubmit = async (e) => {
@@ -29,10 +32,18 @@ function ResetPassword() {
 		setIsLoading(true);
 		getResetPasswordCode({ email })
 			.then((res) => {
+				alert("OTP sent to your email");
 				setOtpSent(true);
 				setIsLoading(false);
+				createToastMessage(
+					"success",
+					res.data.message,
+					setToastList,
+					setPosition
+				);
 			})
 			.catch((err) => {
+				alert("Error sending OTP");
 				setIsLoading(false);
 			});
 	};
@@ -43,10 +54,12 @@ function ResetPassword() {
 		setIsLoading(true);
 		verifyResetPasswordCode({ code: otpCode, email: email })
 			.then((res) => {
+				alert("OTP verified");
 				setOtpVerified(true);
 				setIsLoading(false);
 			})
 			.catch((err) => {
+				alert("Error verifying OTP");
 				setIsLoading(false);
 			});
 	};
@@ -61,7 +74,6 @@ function ResetPassword() {
 			return;
 		}
 		resetPassword({
-			otpCode,
 			email,
 			newPassword,
 			confirmPassword,
@@ -79,7 +91,7 @@ function ResetPassword() {
 		navigate("/auth/login");
 	};
 
-	return (
+	return (<>
 		<div className="wrapper">
 			<div className="container ">
 				<div className="leftContainer">
@@ -188,6 +200,12 @@ function ResetPassword() {
 				</div>
 			</div>
 		</div>
+		<Toast
+		toastList={toastList}
+		position={position}
+		autoDelete={true}
+		autoDeleteTime={2000}
+	/></>
 	);
 }
 

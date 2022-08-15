@@ -15,8 +15,7 @@ const Dashboard = () => {
 	}, [user]);
 
 	return (
-				<TeacherDashboard />
-		
+		<TeacherDashboard />
 	);
 };
 

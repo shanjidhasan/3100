@@ -1,7 +1,9 @@
 import {
 	DashboardSharp,
+	EventNoteRounded,
 	ExitToApp,
 	KeyboardArrowDownRounded,
+	List,
 	Person,
 	Settings,
 } from "@material-ui/icons";
@@ -9,6 +11,7 @@ import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "./header.scss";
 import { loadStorage, delStorage } from "../../../../utils/persistLocalStorage";
+import { getUUID } from "../../../../api/exam.api";
 
 const Header = () => {
 	const navigate = useNavigate();
@@ -20,11 +23,40 @@ const Header = () => {
 			navigate("/auth/login");
 		}
 	}, []);
+	const handleSubmit = async () => {
+		var resp = window.prompt("Enter 8 digit exam code to participate:");
+		console.log(resp);
+		if(resp.length !== 8){
+			alert("Invalid exam code");
+			return;
+		} 
+
+		
+		await enter_exam(resp);
+	};
+
+	const enter_exam = async (sub_uuid) => {
+		getUUID({
+			token: user.token,
+			sub_uuid: sub_uuid,
+			})
+			.then((res) => {
+				console.log(res.data.data);
+				navigate(`/forms/view/${res.data.data.uuid}`);
+			}
+			)
+			.catch((err) => {
+				console.log(err.response);
+				alert(err.response.data.error);
+			}
+		);
+	};
 
 	const logoutUser = () => {
 		delStorage("user");
 		navigate("/");
 	};
+	console.log(user.id, "user");
 
 	const [openOption, setOpenOption] = useState(false);
 
@@ -81,10 +113,21 @@ const Header = () => {
 									<Person />
 									<div>Profile</div>
 								</Link>
+								<Link
+									className="menu_item"
+									to="/responses"
+								>
+									<List />
+									<div>Responses</div>
+								</Link>
 								<Link className="menu_item" to="/settings">
 									<Settings />
 									<div>Settings</div>
 								</Link>
+								<div className="menu_item" onClick={handleSubmit}>
+									<EventNoteRounded />
+									<div >Join Exam</div>
+								</div>
 								<div className="menu_item" onClick={logoutUser}>
 									<ExitToApp />
 									<div>Logout</div>

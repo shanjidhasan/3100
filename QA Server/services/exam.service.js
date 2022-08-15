@@ -7,6 +7,8 @@ const Role = require("../models/role.model");
 const User = require("../models/user.model");
 const { isUserValid, isUserActive, isUserVerified } = require("./utils");
 const { Op } = require("sequelize");
+const Answer = require("../models/answer.model");
+const { response } = require("express");
 
 exports.getAllExams = async (userId) => {
 	console.log(userId);
@@ -17,7 +19,7 @@ exports.getAllExams = async (userId) => {
 			},
 			order: [["updated_at", "DESC"]],
 			include: [
-				
+
 				{
 					model: Question,
 					as: "questions",
@@ -99,25 +101,41 @@ exports.getFormDataByUuid = async (params, data, userId) => {
 			order: [["id", "ASC"]],
 		});
 
-		for (let i = 0; i < questions.length; i++) {
-			const question = questions[i];
-			if (question.question_material_id) {
-				const material = await Material.findOne({
-					where: {
-						id: question.question_material_id,
-					},
-				});
-				question.dataValues.question_material = material;
-			}
-			if (question.answer_material_id) {
-				const answer_material = await Material.findOne({
-					where: {
-						id: question.answer_material_id,
-					},
-				});
-				question.dataValues.answer_material = answer_material;
-			}
+		exam.dataValues.questions = questions;
+
+		return exam;
+	} catch (error) {
+		console.log(error);
+		throw new Error(error);
+	}
+};
+
+exports.getFormPreviewData = async (params, userId) => {
+	try {
+		const { uuid } = params;
+
+		const exam = await Exam.findOne({
+			where: {
+				uuid: uuid,
+			},
+		});
+		if (!exam) {
+			throw new Error("Exam not found");
 		}
+		// if (
+		// 	exam.created_by != userId
+		// ) {
+		// 	throw new Error("You are not authorized to view this exam");
+		// }
+
+		console.log("Here");
+		const questions = await Question.findAll({
+			where: {
+				exam_id: exam.id,
+				is_active: true,
+			},
+			order: [["id", "ASC"]],
+		});
 
 		exam.dataValues.questions = questions;
 
@@ -334,9 +352,6 @@ exports.updateQuestion = async (data, files) => {
 			questionOptions,
 			questionAnswerOptions,
 			questionVisible,
-			questionRequired,
-			questionMaterialCleared,
-			questionAnswerMaterialCleared,
 		} = data;
 		console.log(data);
 		console.log(files);
@@ -370,24 +385,6 @@ exports.updateQuestion = async (data, files) => {
 		});
 		if (!exam) {
 			throw new Error("Exam not found");
-		}
-
-		var question_material;
-		if (question.question_material_id) {
-			question_material = await Material.findOne({
-				where: {
-					id: question.question_material_id,
-				},
-			});
-		}
-
-		var answer_material;
-		if (question.answer_material_id) {
-			answer_material = await Material.findOne({
-				where: {
-					id: question.answer_material_id,
-				},
-			});
 		}
 
 		question.question_text = questionText || "";
@@ -432,179 +429,10 @@ exports.updateQuestion = async (data, files) => {
 			}
 		}
 		await exam.save();
-		// question.is_required = questionRequired;
-
-		if (files.questionFile) {
-			const courseData = await Course.findOne({
-				where: {
-					id: courseId,
-					is_active: true,
-					is_deleted: false,
-				},
-				include: [
-					{
-						model: Subject_x_Class,
-						attributes: ["class_id"],
-						as: "subject",
-					},
-				],
-			});
-			if (courseData == null) {
-				throw new Error("course not found");
-			}
-
-			const user = await User.findOne({
-				where: {
-					id: userId,
-				},
-				include: [
-					{
-						model: Role,
-						as: "role",
-						attributes: [
-							"is_student",
-							"is_teacher",
-							"is_guardian",
-							"is_admin",
-							"is_superadmin",
-						],
-					},
-				],
-			});
-			isUserValid(user);
-			isUserActive(user);
-			isUserVerified(user);
-
-			var rootDir = "public/";
-			var destination =
-				"materials/class/" +
-				courseData.subject.class_id +
-				"/subject_" +
-				courseData.subject_x_class_id +
-				"/course_" +
-				courseId +
-				"/chapter_" +
-				chapterId +
-				"/files/exams/" +
-				examUUID +
-				"/";
-
-			var dir = rootDir + destination;
-			if (!fs.existsSync(dir)) {
-				fs.mkdirSync(dir, { recursive: true });
-			}
-			fs.rename(
-				files.questionFile[0].path,
-				dir + "/" + files.questionFile[0].filename,
-				function (err) {
-					if (err) throw err;
-				}
-			);
-
-			var question_file_material = await Material.create({
-				uuid: uuidv4(),
-				title: files.questionFile[0].originalname,
-				file_path: destination + "/" + files.questionFile[0].filename,
-				file_type: files.questionFile[0].mimetype,
-				size: files.questionFile[0].size,
-				encoding: files.questionFile[0].encoding,
-				uploader_id: userId,
-			});
-
-			question.question_material_id = question_file_material.id;
-		} else if (questionMaterialCleared === "true") {
-			question.question_material_id = null;
-		}
-
-		var question_answer_file_material;
-		if (files.questionAnswerFile) {
-			const courseData = await Course.findOne({
-				where: {
-					id: courseId,
-					is_active: true,
-					is_deleted: false,
-				},
-				include: [
-					{
-						model: Subject_x_Class,
-						attributes: ["class_id"],
-						as: "subject",
-					},
-				],
-			});
-			if (courseData == null) {
-				throw new Error("course not found");
-			}
-
-			const user = await User.findOne({
-				where: {
-					id: userId,
-				},
-				include: [
-					{
-						model: Role,
-						as: "role",
-						attributes: [
-							"is_student",
-							"is_teacher",
-							"is_guardian",
-							"is_admin",
-							"is_superadmin",
-						],
-					},
-				],
-			});
-			isUserValid(user);
-			isUserActive(user);
-			isUserVerified(user);
-
-			var rootDir = "public/";
-			var destination =
-				"materials/class/" +
-				courseData.subject.class_id +
-				"/subject_" +
-				courseData.subject_x_class_id +
-				"/course_" +
-				courseId +
-				"/chapter_" +
-				chapterId +
-				"/files/exams/" +
-				examUUID +
-				"/";
-
-			var dir = rootDir + destination;
-			if (!fs.existsSync(dir)) {
-				fs.mkdirSync(dir, { recursive: true });
-			}
-			fs.rename(
-				files.questionAnswerFile[0].path,
-				dir + "/" + files.questionAnswerFile[0].filename,
-				function (err) {
-					if (err) throw err;
-				}
-			);
-
-			question_answer_file_material = await Material.create({
-				uuid: uuidv4(),
-				title: files.questionAnswerFile[0].originalname,
-				file_path:
-					destination + "/" + files.questionAnswerFile[0].filename,
-				file_type: files.questionAnswerFile[0].mimetype,
-				size: files.questionAnswerFile[0].size,
-				encoding: files.questionAnswerFile[0].encoding,
-				uploader_id: userId,
-			});
-
-			question.answer_material_id = question_answer_file_material.id;
-		} else if (questionAnswerMaterialCleared === "true") {
-			question.answer_material_id = null;
-		}
 
 		await question.save();
 
 		question.dataValues.exam = exam;
-		question.dataValues.question_material = question_material;
-		question.dataValues.answer_material = answer_material;
 
 		return question;
 	} catch (error) {
@@ -641,7 +469,7 @@ exports.deleteQuestion = async (data) => {
 			}
 		}
 		var exam
-		if(question.is_active){
+		if (question.is_active) {
 			exam = await Exam.findOne({
 				where: {
 					id: question.exam_id,
@@ -679,9 +507,206 @@ exports.deleteQuestion = async (data) => {
 		// 		question.dataValues.answer_material = answer_material;
 		// 	}
 		// }
-		return {questions, total_marks: exam.total_marks};
+		return { questions, total_marks: exam.total_marks };
 	} catch (error) {
 		console.log(error);
 		throw new Error(error);
 	}
+};
+exports.submitForm = async (data, userId) => {
+	const prev = await Answer.findOne({
+		where: {
+			exam_id: data.exam_id,
+			answered_by: userId,
+		},
+	});
+	if (prev) {
+		throw new Error("Already submitted once");
+	}
+	var obtained_marks = 0;
+	var answers = [];
+	for (let i = 0; i < data.answer.length; i++) {
+		var q_id = data.answer[i].q_id;
+		var answer = data.answer[i].answer;
+		var marks = 0;
+		console.log(data.answer[i].q_id);
+		var question = await Question.findOne({
+			where: {
+				id: data.answer[i].q_id,
+			},
+		});
+		if (question.type === "text") {
+			if (data.answer[i].answer.toLowerCase() === question.answer.toLowerCase()) {
+				obtained_marks += question.marks;
+				marks = question.marks;
+			}
+		} else {
+			var correct_answers = JSON.stringify(question.answer_options)
+			var given_answers = JSON.stringify(data.answer[i].answer.split(","))
+			if (correct_answers === given_answers) {
+				obtained_marks += question.marks;
+				marks = question.marks;
+			}
+		}
+		answers.push({ "q_id": q_id, "answer": answer, "marks": marks });
+	}
+	var student_answer = await Answer.create({
+		uuid: uuidv4(),
+		answered_by: userId,
+		exam_id: data.exam_id,
+		obtained_marks: obtained_marks,
+		answer: answers,
+	});
+	return student_answer;
+};
+exports.get_form_response_data_by_exam_id_and_student_id = async (data, userId) => {
+	console.log(data)
+	const exam = await Exam.findOne({
+		where: {
+			uuid: data.exam_id,
+		}
+	});
+	if (!exam) {
+		throw new Error("Exam not found");
+	}
+	var answers = await Answer.findOne({
+		where: {
+			exam_id: exam.id,
+			answered_by: data.student_id,
+		},
+	});
+	if (!answers) {
+		throw new Error("Answer not found");
+	}
+
+	const student = await User.findOne({
+		where: {
+			id: data.student_id,
+		}
+	});
+	if (!student) {
+		throw new Error("Student not found");
+	}
+
+	var processed_answers = [];
+	for (let i = 0; i < answers.answer.length; i++) {
+		processed_answers.push(JSON.parse(answers.answer[i]));
+	}
+
+	const questions = await Question.findAll({
+		where: {
+			exam_id: exam.id,
+		},
+		order: [["id", "ASC"]],
+	});
+
+	for (let i = 0; i < questions.length; i++) {
+		const question = questions[i];
+		for (let j = 0; j < processed_answers.length; j++) {
+			if (processed_answers[j].q_id === question.id) {
+				if (question.type === "text") {
+					question.dataValues.student_answer = processed_answers[j].answer;
+				} else {
+					question.dataValues.student_answer = processed_answers[j].answer.split(",");
+				}
+				question.dataValues.ob_marks = processed_answers[j].marks;
+			}
+		}
+	}
+
+	exam.dataValues.questions = questions;
+	exam.dataValues.student = student;
+	exam.dataValues.obtained_marks = answers.obtained_marks;
+
+	console.log({ exam })
+
+	return exam;
+};
+
+exports.get_all_responses_by_exam_id = async (data) => {
+	const { uuid } = data;
+	const exam = await Exam.findOne({
+		where: {
+			uuid: uuid,
+		}
+	});
+	if (!exam) {
+		throw new Error("Exam not found");
+	}
+	var responses = await Answer.findAll({
+		where: {
+			exam_id: exam.id,
+		},
+		include: [{
+			model: Exam,
+			as: "exam",
+		}, {
+			model: User,
+			as: "student",
+			attributes: ["id", "username", "email", "first_name", "last_name"],
+		}
+		],
+	});
+	console.log("Res: " + responses);
+	return responses;
+};
+
+exports.get_all_responses_by_student_id = async (userId) => {
+	var responses = await Answer.findAll({
+		where: {
+			answered_by: userId,
+		},
+		include: [{
+			model: Exam,
+			as: "exam",
+		}, {
+			model: User,
+			as: "student",
+			attributes: ["id", "username", "email", "first_name", "last_name"],
+		}
+		],
+	});
+	res_exams = [];
+	for (let i = 0; i < responses.length; i++) {
+		const response = responses[i];
+		const exam = response.exam;
+		res_exams.push(exam);
+	}
+	console.log("Res: " + responses);
+	return res_exams;
+};
+exports.getUUID = async (params, userId) => {
+
+	
+    const { subUUID } = params;
+
+    console.log("hereeeeee" + subUUID)
+
+    var temp = subUUID + "%"
+
+    var exam = await Exam.findOne({
+
+        where: {
+
+            uuid: {
+				[Op.like]: temp
+			}
+        },
+
+    });
+	if(!exam){
+		throw new Error("Exam not found");
+	}
+	const prev = await Answer.findOne({
+		where: {
+			exam_id: exam.id,
+			answered_by: userId,
+		}
+	});
+	if (prev) {
+		throw new Error("Already submitted once"); 
+	}
+
+    return {"uuid": exam.uuid};
+
 };

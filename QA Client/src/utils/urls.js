@@ -18,21 +18,30 @@ export const VERIFICATION_URL = AUTH_URL + "/verification";
 export const RESEND_OTP_URL = AUTH_URL + "/resend_otp";
 export const SOCIAL_SIGNUP_URL = AUTH_URL + "/social_signup";
 export const GET_RESET_PASSWORD_CODE_URL =
-	AUTH_URL + "/get_reset_password_code";
+	AUTH_URL + "/resend_otp";
 export const VERIFY_RESET_PASSWORD_URL =
-	AUTH_URL + "/verify_reset_password_code";
+	AUTH_URL + "/verification";
 export const RESET_PASSWORD_URL = AUTH_URL + "/reset_password";
+export const CHANGE_PASSWORD_URL = AUTH_URL + "/change_password";
 
 // EXAM
 export const EXAM_URL = BASE_URL + "/exam";
 export const GET_ALL_EXAMS_URL = EXAM_URL + "/get_all_exams";
 export const CREATE_EXAM_URL = EXAM_URL + "/create_exam";
 export const GET_FORM_DATA_URL = EXAM_URL + "/get_form_data";
+export const GET_FORM_PREVIEW_DATA_URL = EXAM_URL + "/get_form_preview_data";
 export const UPDATE_FORM_INFO_URL = EXAM_URL + "/update_form_info";
 export const CREATE_QUESTION_URL = EXAM_URL + "/create_question";
 export const UPDATE_QUESTION_URL = EXAM_URL + "/update_question";
 export const DELETE_QUESTION_URL = EXAM_URL + "/delete_question";
 export const LAUNCH_EXAM_URL = EXAM_URL + "/launch_exam";
+export const GET_ALL_RESPONSES_BY_EXAM_ID_URL = EXAM_URL + "/get_all_responses_by_exam_id";
+export const GET_FORM_RESPONSE_BY_EXAM_ID_AND_STUDENT_ID_URL = EXAM_URL + "/get_form_response_data_by_exam_id_and_student_id";
+export const GET_ALL_RESPONSES_BY_STUDENT_ID_URL = EXAM_URL + "/get_all_responses_by_student_id";
+export const GET_UUID_BY_SUBUUID = EXAM_URL + "/getUUID";
+export const SUBMIT_FORM = EXAM_URL + "/submitform";
+
+
 
 // User
 export const USER_URL = BASE_URL + "/user";

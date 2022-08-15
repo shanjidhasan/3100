@@ -21,14 +21,14 @@ const TeacherDashboard = () => {
             </div>
 
             <div
-                style={{
-                    display: "flex",
-                    flexDirection: "row",
-                    width: "100%",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    paddingBottom: "150px",
-                }}
+                // style={{
+                //     display: "flex",
+                //     flexDirection: "row",
+                //     width: "90%",
+                //     justifyContent: "center",
+                //     alignItems: "center",
+                //     paddingBottom: "150px",
+                // }}
             >
                <FormPage />
             </div>

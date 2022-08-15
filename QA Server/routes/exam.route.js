@@ -11,6 +11,12 @@ const {
 	deleteExam,
 	launchExam,
 	deactivateExamByTeacher,
+	submitForm,
+	get_form_response_data_by_exam_id_and_student_id,
+	get_all_responses_by_exam_id,
+	get_all_responses_by_student_id,
+	getFormPreviewData,
+	getUUID,
 } = require("../controllers/exam.controller");
 const router = express.Router();
 
@@ -34,6 +40,7 @@ const upload = multer({ storage: fileStorageEngine });
 router.get("/get_all_exams", authorizeVerifiedUser, getAllExams);
 router.post("/create_exam", authorizeVerifiedUser, createExam);
 router.post("/get_form_data/:uuid", authorizeVerifiedUser, getFormDataByUuid);
+router.get("/get_form_preview_data/:uuid", authorizeVerifiedUser, getFormPreviewData);
 router.put("/update_form_info", updateFormInfo);
 router.delete("/delete_exam", deleteExam);
 router.post("/launch_exam", authorizeVerifiedUser, launchExam);
@@ -58,5 +65,11 @@ router.put(
 	updateQuestion
 );
 router.delete("/delete_question", deleteQuestion);
+router.post("/submitform", authorizeVerifiedUser, submitForm);
+router.post("/get_form_response_data_by_exam_id_and_student_id", authorizeVerifiedUser, get_form_response_data_by_exam_id_and_student_id);
+router.get("/get_all_responses_by_exam_id/:uuid", authorizeVerifiedUser, get_all_responses_by_exam_id);
+router.get("/get_all_responses_by_student_id", authorizeVerifiedUser, get_all_responses_by_student_id);//////////
+router.get("/getUUID/:subUUID", authorizeVerifiedUser, getUUID);
+
 
 module.exports = router;

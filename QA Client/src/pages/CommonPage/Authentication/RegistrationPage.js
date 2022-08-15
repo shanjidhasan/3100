@@ -8,6 +8,8 @@ import { EMAILREGEX } from "../../../utils/constants";
 import "./auth.scss";
 import CheckboxField from "../../../components/inputField/CheckboxField";
 import FormError from "../../../components/formError/FormError";
+import Toast from "../../../components/toast/Toast";
+import { createToastMessage } from "../../../utils/toastUtil";
 
 const RegistrationPage = () => {
 	const [inputs, setInputs] = useState({
@@ -25,6 +27,9 @@ const RegistrationPage = () => {
 	const [dataSubmitted, setDataSubmitted] = useState(false);
 	const [isLoading, setIsLoading] = useState(false);
 	const [formError, setFormError] = useState(null);
+
+	const [toastList, setToastList] = useState([]);
+	const [position, setPosition] = useState("bottom-right");
 
 	const navigate = useNavigate();
 	var user = loadStorage("user");
@@ -104,15 +109,6 @@ const RegistrationPage = () => {
 			setFormError("Passwords do not match");
 			return;
 		}
-		if (
-			!inputs.asTeacher &&
-			!inputs.asStudent &&
-			!inputs.asGuardian &&
-			!inputs.asSchoolAdmin
-		) {
-			setFormError("Please select at least one role");
-			return;
-		}
 		setFormError(null);
 
 		console.log(inputs);
@@ -120,97 +116,124 @@ const RegistrationPage = () => {
 			.then((res) => {
 				console.log(res);
 				saveStorage("user", JSON.stringify(res.data.data["user"]));
-				setDataSubmitted(true);
 				setIsLoading(false);
+
+				createToastMessage(
+					"success",
+					"Success",
+					res.data.message,
+					toastList,
+					setToastList
+				);
+				setTimeout(() => {
+
+					navigate("/auth/login");
+				}, 2000);
 			})
 			.catch((err) => {
 				setFormError(err.response.data.error);
 				setIsLoading(false);
+				createToastMessage(
+					"error",
+					"Error",
+					err.response.data.error,
+					toastList,
+					setToastList
+				);
 			});
 	};
 
 	return (
-		<div className="wrapper">
-			<div className="container">
-				<div className="leftContainer">
-					<img
-						className="leftContainerLogo"
-						src={require("./../../../media/images/TSCDemoLogo.png")}
-						alt="Logo"
-					/>
-					<div className="leftContainerText">
-						Welcome To{" "}
-						<Link
-							to="/"
-							style={{
-								textDecoration: "none",
-								color: "inherit",
-								fontWeight: "bold",
-								fontSize: "1.5rem",
-							}}
-						>
-							QuickAssessment
-						</Link>
-						, a platform that helps teachers to assess all the students within a very short time during the classes.
+		<>
+			<div className="wrapper">
+				<div className="container">
+					<div className="leftContainer">
+						<img
+							className="leftContainerLogo"
+							src={require("./../../../media/images/TSCDemoLogo.png")}
+							alt="Logo"
+						/>
+						<div className="leftContainerText">
+							Welcome To{" "}
+							<Link
+								to="/"
+								style={{
+									textDecoration: "none",
+									color: "inherit",
+									fontWeight: "bold",
+									fontSize: "1.5rem",
+								}}
+							>
+								QuickAssessment
+							</Link>
+							, a platform that helps teachers to assess all the students within a very short time during the classes.
+						</div>
+					</div>
+					<div className="rightContainer">
+						<form className="rightContainerForm">
+							<div className="formTitle">Sign Up</div>
+							<InputField
+								type="text"
+								name="firstName"
+								placeholder="First Name"
+								onChange={(e) => handleChange("firstName", e)}
+							/>
+							<InputField
+								type="text"
+								name="lastName"
+								placeholder="Last Name"
+								onChange={(e) => handleChange("lastName", e)}
+							/>
+							<InputField
+								type="text"
+								name="username"
+								placeholder="Username"
+								onChange={(e) => handleChange("username", e)}
+							/>
+							<InputField
+								type="email"
+								name="email"
+								placeholder="Email Address"
+								onChange={(e) => handleChange("email", e)}
+							/>
+							<InputField
+								type="password"
+								name="password"
+								placeholder="Password"
+								onChange={(e) => handleChange("password", e)}
+							/>
+							<InputField
+								type="password"
+								name="confirmPassword"
+								placeholder="Confirm Password"
+								onChange={(e) => handleChange("confirmPassword", e)}
+							/>
+
+
+							<BlueButton btnText="Sign Up" onClick={handleSubmit} />
+
+							<div className="formFooter">
+								<span>
+									Already have an account?{" "}
+									<Link to="/auth/login" className="noDecoration">
+										Login
+									</Link>
+								</span>
+							</div>
+
+							{formError && <FormError error={formError} />}
+						</form>
 					</div>
 				</div>
-				<div className="rightContainer">
-					<form className="rightContainerForm">
-						<div className="formTitle">Sign Up</div>
-						<InputField
-							type="text"
-							name="firstName"
-							placeholder="First Name"
-							onChange={(e) => handleChange("firstName", e)}
-						/>
-						<InputField
-							type="text"
-							name="lastName"
-							placeholder="Last Name"
-							onChange={(e) => handleChange("lastName", e)}
-						/>
-						<InputField
-							type="text"
-							name="username"
-							placeholder="Username"
-							onChange={(e) => handleChange("username", e)}
-						/>
-						<InputField
-							type="email"
-							name="email"
-							placeholder="Email Address"
-							onChange={(e) => handleChange("email", e)}
-						/>
-						<InputField
-							type="password"
-							name="password"
-							placeholder="Password"
-							onChange={(e) => handleChange("password", e)}
-						/>
-						<InputField
-							type="password"
-							name="confirmPassword"
-							placeholder="Confirm Password"
-							onChange={(e) => handleChange("confirmPassword", e)}
-						/>
-						
-
-						<BlueButton btnText="Sign Up" onClick={handleSubmit} />
-
-						<div className="formFooter">
-							<span>
-								Already have an account?{" "}
-								<Link to="/auth/login" className="noDecoration">
-									Login
-								</Link>
-							</span>
-						</div>
-
-						{formError && <FormError error={formError} />}
-					</form>
-				</div>
 			</div>
-		</div>
+
+			<Toast
+				toastList={toastList}
+				position={position}
+				autoDelete={true}
+				autoDeleteTime={2000}
+			/>
+		</>
 	);
 };
 

@@ -1,16 +1,17 @@
-import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { getAllExams } from "../../../api/exam.api";
-import { delStorage } from "../../../utils/persistLocalStorage";
-import { formatDateTime } from "../../../utils/utility";
-import "./formList.scss";
+import React, { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom';
+import { getAllExams, get_all_responses_by_student_id } from '../../../api/exam.api';
+import './../../../components/form/form_list/formList.scss';
+import { delStorage, loadStorage } from '../../../utils/persistLocalStorage';
+import { formatDateTime } from '../../../utils/utility';
 
-function FormList({user}) {
+const MyResponses = () => {
+    var user = loadStorage("user");
     const navigate = useNavigate();
     const [formData, setFormData] = useState([]);
 
     useEffect(() => {
-        getAllExams({token: user.token})
+        get_all_responses_by_student_id({ token: user.token })
             .then((res) => {
                 console.log(res.data.data);
                 setFormData(res.data.data);
@@ -26,15 +27,13 @@ function FormList({user}) {
 
     const handleOnClick = (uuid) => {
         console.log(uuid);
-        navigate(`/forms/edit/${uuid}`);
+        navigate(`/forms/response/${uuid}/${user.id}`);
     };
 
     return (
         <div className="form_list_container">
-            <div className="title">
-                <span>Recent Forms</span>
-            </div>
-            <div className="form_list">
+            <h1>MyResponses</h1>
+            <div className='form_list'>
                 {formData.map((form, index) => {
                     return (
                         <div
@@ -74,7 +73,7 @@ function FormList({user}) {
                 })}
             </div>
         </div>
-    );
+    )
 }
 
-export default FormList;
+export default MyResponses
