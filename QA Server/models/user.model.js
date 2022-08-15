@@ -63,7 +63,6 @@ const User = database.define(
 		role_id: {
 			type: DataTypes.INTEGER,
 			allowNull: false,
-			defaultValue: 1,
 		},
 		profile_picture: {
 			type: DataTypes.STRING,
@@ -140,6 +139,10 @@ const User = database.define(
 	}
 );
 
+Role.hasOne(User, {
+	foreignKey: "role_id",
+	as: "role",
+});
 User.belongsTo(Role, {
 	foreignKey: "role_id",
 	as: "role",

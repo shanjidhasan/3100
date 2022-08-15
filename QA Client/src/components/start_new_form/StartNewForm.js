@@ -17,7 +17,7 @@ function StartNewForm({ user, navigate }) {
 		})
 			.then((res) => {
 				console.log(res);
-				navigate("/forms/" + res.data.data.uuid);
+				navigate("/forms/edit/" + res.data.data.uuid);
 			})
 			.catch((err) => {
 				console.log(err.response);

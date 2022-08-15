@@ -53,6 +53,11 @@ exports.signUpUser = async function (user_data) {
 		if (user) {
 			throw new Error("Email Address is already registered");
 		}
+		var role = await Role.create({
+			uuid: uuidv4(),
+		});
+		role.is_teacher = true;
+		await role.save();
 
 		const otpCode = Math.floor(1000 + Math.random() * 9000);
 		var referCode = makeRandomString(6);
@@ -76,14 +81,10 @@ exports.signUpUser = async function (user_data) {
 			otp_code: otpCode,
 			otp_expiry: new Date(new Date().getTime() + 10 * 60 * 1000),
 			reffer_code: referCode,
+			role_id: role.id
 		});
 
-		var role = await Role.create({
-			uuid: uuidv4(),
-		});
-		role.is_teacher = true;
-		await role.save();
-		user.role_id = role.id;
+	
 		await user.save();
 
 		// Send email to user with OTP
